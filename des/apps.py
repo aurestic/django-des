@@ -1,17 +1,16 @@
-# -*- coding: utf-8
-
 import sys
+
 from django.apps import AppConfig
 from django.conf import global_settings, settings
 
 
 class DjangoDesConfig(AppConfig):
-    name = 'des'
-    verbose_name = 'Dynamic Email Settings'
+    name = "des"
+    verbose_name = "Dynamic Email Settings"
     verbose_name_plural = verbose_name
 
     def ready(self):
-        if 'runserver' in sys.argv:
+        if "runserver" in sys.argv:
             from des.models import DynamicEmailConfiguration
 
             c = DynamicEmailConfiguration.get_solo()
