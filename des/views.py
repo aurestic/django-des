@@ -1,16 +1,16 @@
-from django.http import HttpResponseRedirect, HttpResponseNotFound
-from django.views.decorators.http import require_http_methods
-from django.contrib import messages
-from django.template import loader
 from django.conf import settings
+from django.contrib import messages
 from django.core.mail import send_mail
-from django.utils.translation import ugettext as _
-from des.models import DynamicEmailConfiguration
-from des.helpers import get_configuration_admin_url
+from django.http import HttpResponseNotFound, HttpResponseRedirect
+from django.template import loader
+from django.views.decorators.http import require_http_methods
 
-subject = getattr(settings, 'DES_TEST_SUBJECT', _("Test Email"))
-text_template = getattr(settings, 'DES_TEST_TEXT_TEMPLATE', "des/test_email.txt")
-html_template = getattr(settings, 'DES_TEST_HTML_TEMPLATE', None)
+from des.helpers import get_configuration_admin_url
+from des.models import DynamicEmailConfiguration
+
+subject = getattr(settings, "DES_TEST_SUBJECT", "Test Email")
+text_template = getattr(settings, "DES_TEST_TEXT_TEMPLATE", "des/test_email.txt")
+html_template = getattr(settings, "DES_TEST_HTML_TEMPLATE", None)
 
 message_text = loader.render_to_string(text_template)
 message_html = loader.render_to_string(html_template) if html_template else None
@@ -22,7 +22,7 @@ def send_test_email(request):
     if request.user is None or not request.user.is_staff:
         return HttpResponseNotFound()
 
-    email = request.POST.get('email', None)
+    email = request.POST.get("email", None)
     config = DynamicEmailConfiguration.get_solo()
 
     if email:
@@ -32,21 +32,23 @@ def send_test_email(request):
                 message_text,
                 config.from_email or None,
                 [email],
-                html_message = message_html)
+                html_message=message_html,
+            )
 
-            messages.success(request,
-                 _("Test email sent. Please check \"{}\" for a "
-                 "message with the subject \"{}\"").format(
+            messages.success(
+                request,
+                'Test email sent. Please check "{}" for a '
+                'message with the subject "{}"'.format(
                     email,
-                    subject
-                )
+                    subject,
+                ),
             )
         except Exception as e:
-            messages.error(request, _("Could not send email. {}").format(e))
+            messages.error(request, "Could not send email. {}").format(e)
     else:
-        messages.error(request, _("You must provide an email address to test with."))
+        messages.error(request, "You must provide an email address to test with.")
 
     return HttpResponseRedirect(get_configuration_admin_url())
 
 
-__all__ = ['send_test_email']
+__all__ = ["send_test_email"]
